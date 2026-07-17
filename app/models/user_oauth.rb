@@ -1,3 +1,5 @@
+require 'jwt'
+
 # In-memory store keyed by authorization_code (the encrypted deterministic field)
 # and by user_id for uniqueness.
 class UserOauth
@@ -51,10 +53,10 @@ class UserOauth
   end
 
   def self.jwk
-    pem = EnvironmentParameters[:root_gateway_pem]
-    raise "root_gateway_pem is not configured" unless pem.present?
+    pem = EnvironmentParameters[:agentcore_gateway_pem]
+    raise "agentcore_gateway_pem is not configured" unless pem.present?
     optional_parameters = { kid: 'root-gateway', use: 'sig', alg: 'RS512' }
-    JWT::JWK.new(OpenSSL::PKey::RSA.new(pem), optional_parameters)
+    ::JWT::JWK.new(OpenSSL::PKey::RSA.new(pem), optional_parameters)
   end
 
   def jwt(expiration = 1.year)
@@ -66,20 +68,20 @@ class UserOauth
       "user_id": user_id,
       "user_oauth_identifier": identifier,
       "token_use": "access",
-      "scope": EnvironmentParameters[:root_gateway_token_scope],
+      "scope": EnvironmentParameters[:agentcore_gateway_token_scope],
       "auth_time": now,
       "iss": Constants::BASE_URL,
       "exp": (now + expiration).to_i,
       "iat": now,
       "version": 2,
       "jti": SecureRandom.uuid,
-      "client_id": EnvironmentParameters[:root_gateway_client_id]
+      "client_id": EnvironmentParameters[:agentcore_gateway_client_id]
     }
-    JWT.encode(payload, jwk.signing_key, jwk[:alg], kid: jwk[:kid])
+    ::JWT.encode(payload, jwk.signing_key, jwk[:alg], kid: jwk[:kid])
   end
 
   def self.jwks_as_json
-    JWT::JWK::Set.new([jwk]).export
+    ::JWT::JWK::Set.new([jwk]).export
   end
 
   private

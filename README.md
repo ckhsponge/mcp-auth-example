@@ -24,7 +24,7 @@ Copy the example env file and fill in your values:
 
 ```bash
 cp .env.example .env
-# edit .env — at minimum generate a ROOT_GATEWAY_PEM:
+# edit .env — at minimum generate a AGENTCORE_GATEWAY_PEM:
 openssl genrsa 2048
 ```
 
@@ -71,6 +71,6 @@ Copy `.env.example` to `.env` and fill in values.
 | `PORT_OVERRIDE` | Port appended to BASE_URL (set for local dev) |
 | `PROTOCOL` | `http` or `https` |
 | `SESSION_SECRET` | Secret for signing session cookies |
-| `ROOT_GATEWAY_PEM` | RSA private key PEM for signing JWTs (`openssl genrsa 2048`) |
-| `ROOT_GATEWAY_TOKEN_SCOPE` | Scope included in issued tokens |
-| `ROOT_GATEWAY_CLIENT_ID` | Client ID included in issued tokens |
+| `AGENTCORE_GATEWAY_PEM` | RSA private key PEM for signing JWTs (`openssl genrsa 2048`) |
+| `AGENTCORE_GATEWAY_TOKEN_SCOPE` | Scope included in issued tokens |
+| `AGENTCORE_GATEWAY_CLIENT_ID` | Client ID included in issued tokens |

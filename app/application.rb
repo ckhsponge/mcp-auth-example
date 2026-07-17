@@ -14,11 +14,7 @@ require 'dotenv' if Sinatra::Base.development? || Sinatra::Base.test?
 require 'json'
 require 'ostruct'
 require 'zeitwerk'
-require 'active_support'
-require 'active_support/core_ext/object/blank'
-require 'active_support/core_ext/object/json'
-require 'active_support/core_ext/numeric/time'
-require 'active_support/core_ext/string/inflections'
+require 'active_support/all'
 
 APP_ROOT = File.dirname(__FILE__)
 

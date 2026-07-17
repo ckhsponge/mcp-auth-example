@@ -117,7 +117,7 @@ class OauthController < ApplicationController
       access_token: bearer_token,
       token_type: 'Bearer',
       expires_in: expiration.to_i,
-      scope: EnvironmentParameters[:root_gateway_token_scope]
+      scope: EnvironmentParameters[:agentcore_gateway_token_scope]
     })
   end
 end
