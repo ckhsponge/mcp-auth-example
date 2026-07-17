@@ -1,0 +1,25 @@
+h1 class="text-3xl font-bold mb-6" Authorize Access
+
+p class="mb-6 text-gray-600"
+  | An application is requesting access to your account.
+
+- if current_user
+  p class="mb-4 text-sm text-gray-500"
+    | Logged in as #{current_user.first_name} #{current_user.last_name} (#{current_user.email})
+
+form action="/oauth/authorize" method="post"
+  - @authorize_params.each do |k, v|
+    input type="hidden" name=k value=v
+  .flex.gap-4
+    - if current_user
+      button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" Allow
+    - else
+      button type="button" onclick="loginThenReturn()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" Login to Allow
+    button type="submit" name="deny" value="true" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300" Deny
+
+javascript:
+  function loginThenReturn() {
+    fetch('/login', { method: 'GET', redirect: 'manual' }).then(function() {
+      window.location.reload();
+    });
+  }

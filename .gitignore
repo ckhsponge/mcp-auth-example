@@ -1,0 +1,7 @@
+.env
+.idea
+.vscode
+app/vendor/bundle
+app/.bundle
+tmp
+log

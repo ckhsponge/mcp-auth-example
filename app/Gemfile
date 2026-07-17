@@ -1,0 +1,22 @@
+ruby '~> 3.4.8'
+
+source 'https://rubygems.org'
+
+gem 'rack', '~> 3.1'
+gem 'rack-contrib', '~> 2.5'
+gem 'sinatra', '~> 4'
+gem 'sinatra-contrib', '~> 4'
+gem 'slim', '~> 5.2'
+
+group :development do
+  gem 'puma', '~> 6'
+  gem 'dotenv', '~> 2'
+  gem 'rerun', '~> 0.13'
+end
+
+gem 'rake', '~> 13.3'
+gem 'zeitwerk', '~> 2.7'
+gem 'aws-sdk-ssm', '~> 1.211'
+gem 'activesupport', '~> 8.1'
+gem 'openssl', '~> 3.3'
+gem 'jwt', '~> 3.1'
