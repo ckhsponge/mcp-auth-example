@@ -55,7 +55,7 @@ class UserOauth
   def self.jwk
     pem = EnvironmentParameters[:mcp_server_pem]
     raise "mcp_server_pem is not configured" unless pem.present?
-    optional_parameters = { kid: EnvironmentParameters[:mcp_server_kid], use: 'sig', alg: 'RS512' }
+    optional_parameters = { kid: EnvironmentParameters[:mcp_server_kid], use: 'sig', alg: EnvironmentParameters[:mcp_server_algorithm] }
     ::JWT::JWK.new(OpenSSL::PKey::RSA.new(pem), optional_parameters)
   end
 

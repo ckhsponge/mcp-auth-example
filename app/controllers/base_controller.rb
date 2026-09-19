@@ -1,8 +1,6 @@
 class BaseController < Sinatra::Application
 
-  configure :development do
-    set :host_authorization, { permitted_hosts: [] }
-  end
+  set :host_authorization, { permitted_hosts: [] } # all hosts permitted
 
   def development?
     Sinatra::Base.development?
