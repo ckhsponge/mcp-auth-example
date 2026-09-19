@@ -23,7 +23,7 @@ class EnvironmentParameters
 
   def self.fetch_from_ssm(key)
     ssm_client.get_parameter(
-      name: "#{Constants::SSM_PREFIX}/#{key}",
+      name: "#{Constants::SSM_PREFIX}/#{key.upcase}",
       with_decryption: true
     ).parameter.value
   rescue Aws::SSM::Errors::ParameterNotFound
