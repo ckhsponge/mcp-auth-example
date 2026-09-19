@@ -54,16 +54,7 @@ class OauthController < ApplicationController
       :code_challenge, :code_challenge_method, :resource, :state
     )
 
-    render_component 'OAuthConsent', {
-      client_id: params[:client_id],
-      client_name: registration.client_name,
-      client_uri: registration.client_uri,
-      logo_uri: registration.logo_uri,
-      redirect_uri: registration.verified_redirect_uri,
-      resource: params[:resource],
-      authorize_params: @authorize_params,
-      current_user: current_user&.as_json
-    }.compact, noscript_view: false
+    slim :oauth_authorize
   end
 
   post '/authorize' do
