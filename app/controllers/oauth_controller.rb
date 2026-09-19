@@ -13,13 +13,18 @@ class OauthController < ApplicationController
     client_metadata = JSON.parse(request.body.read) rescue {}
 
     client_id = SecureRandom.alphanumeric(32)
-    registration = OauthRegistration.create!(
-      client_id: client_id,
-      client_name: client_metadata['client_name'],
-      logo_uri: client_metadata['logo_uri'],
-      client_uri: client_metadata['client_uri'],
-      redirect_uris: client_metadata['redirect_uris'] || []
-    )
+    registration = begin
+      OauthRegistration.create!(
+        client_id: client_id,
+        client_name: client_metadata['client_name'],
+        logo_uri: client_metadata['logo_uri'],
+        client_uri: client_metadata['client_uri'],
+        redirect_uris: client_metadata['redirect_uris'] || []
+      )
+    rescue => e
+      logger.error "[/oauth/register] #{e.class}: #{e.message}\n#{e.backtrace.first(5).join("\n")}"
+      halt_json(:internal_server_error, e.message)
+    end
 
     json({
       client_id: client_id,
