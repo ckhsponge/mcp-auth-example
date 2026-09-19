@@ -15,6 +15,9 @@ require 'json'
 require 'ostruct'
 require 'zeitwerk'
 require 'active_support/all'
+require 'active_record'
+require 'activerecord-dsql-adapter'
+require 'sinatra/activerecord'
 
 APP_ROOT = File.dirname(__FILE__)
 
