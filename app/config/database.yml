@@ -1,0 +1,31 @@
+default_connection: &default_connection
+  adapter: dsql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  occ_max_retries: 3
+  max_lifetime_minutes: 45
+  sslmode: require
+  #  Also defined in BaseController, allows forcing of obfuscated connection:
+  host: <%= ENV['DATABASE_HOST'] %>
+
+
+# used by obfuscate job
+default:
+  primary:
+    <<: *default_connection
+
+development:
+  primary:
+    <<: *default_connection
+
+test:
+  primary:
+    <<: *default_connection
+
+staging:
+  primary:
+    <<: *default_connection
+
+production:
+  primary:
+    <<: *default_connection

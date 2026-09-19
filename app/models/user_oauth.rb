@@ -53,9 +53,9 @@ class UserOauth
   end
 
   def self.jwk
-    pem = EnvironmentParameters[:agentcore_gateway_pem]
-    raise "agentcore_gateway_pem is not configured" unless pem.present?
-    optional_parameters = { kid: 'root-gateway', use: 'sig', alg: 'RS512' }
+    pem = EnvironmentParameters[:mcp_server_pem]
+    raise "mcp_server_pem is not configured" unless pem.present?
+    optional_parameters = { kid: EnvironmentParameters[:mcp_server_kid], use: 'sig', alg: 'RS512' }
     ::JWT::JWK.new(OpenSSL::PKey::RSA.new(pem), optional_parameters)
   end
 
@@ -68,14 +68,14 @@ class UserOauth
       "user_id": user_id,
       "user_oauth_identifier": identifier,
       "token_use": "access",
-      "scope": EnvironmentParameters[:agentcore_gateway_token_scope],
+      "scope": EnvironmentParameters[:mcp_server_invoke_scope],
       "auth_time": now,
       "iss": Constants::BASE_URL,
       "exp": (now + expiration).to_i,
       "iat": now,
       "version": 2,
       "jti": SecureRandom.uuid,
-      "client_id": EnvironmentParameters[:agentcore_gateway_client_id]
+      "aud": EnvironmentParameters[:mcp_server_audience]
     }
     ::JWT.encode(payload, jwk.signing_key, jwk[:alg], kid: jwk[:kid])
   end

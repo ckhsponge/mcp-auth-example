@@ -1,0 +1,50 @@
+# Rakefile
+
+# require 'dotenv'
+# Dotenv.load('.env')
+# puts "DONTENV"
+# puts ENV['DATABASE_URL']
+
+require 'sinatra/base' # use /base for modular app
+require 'sinatra/json'
+
+require 'dotenv' if Sinatra::Base.development? || Sinatra::Base.test?
+Dotenv.load('../.env') if Sinatra::Base.development?
+if Sinatra::Base.test?
+  Dotenv.load('../.env_test', '../.env_test_aws')
+  puts "WARNING: AWS_ACCESS_KEY_ID not set" unless ENV['AWS_ACCESS_KEY_ID']
+  puts "WARNING: AWS_SECRET_ACCESS_KEY not set" unless ENV['AWS_SECRET_ACCESS_KEY']
+end
+
+require 'active_record'
+require 'activerecord-dsql-adapter'
+require 'sinatra/activerecord'
+require "sinatra/activerecord/rake"
+
+
+
+namespace :db do
+  task :load_config do
+    require_relative "./application"
+  end
+end
+
+namespace :db do
+  desc "Drop all tables"
+  task :drop_tables => :environment do
+    require_relative "./application"
+    conn = ActiveRecord::Base.connection
+    tables = conn.tables # Get a list of all tables in the database
+
+    # Exclude tables that should not be dropped, like schema_migrations
+    # tables.delete("schema_migrations")
+
+    tables.each do |table|
+      puts "Dropping table #{table}"
+      conn.drop_table(table, force: :cascade) # Drop the table, cascading to dependent tables
+    end
+    
+    # Write the schema file
+    Rake::Task["db:schema:dump"].invoke
+  end
+end

@@ -1,4 +1,4 @@
-ruby '~> 3.4.8'
+ruby '~> 3.4.10'
 
 source 'https://rubygems.org'
 
@@ -22,3 +22,10 @@ gem 'jwt', '~> 3.1'
 gem 'bigdecimal', '4.1.2'
 gem 'json', '2.21.1'
 gem 'prism', '1.9.0'
+
+gem "activerecord", "~> 8.1"
+gem "sinatra-activerecord", "~> 2.0"
+# gem "activerecord-dsql-adapter", path: "../../activerecord-dsql-adapter"
+gem 'activerecord-dsql-adapter', git: 'https://github.com/ckhsponge/activerecord-dsql-adapter.git', branch: 'occ-retry'
+
+gem "faraday", "~> 2.14"

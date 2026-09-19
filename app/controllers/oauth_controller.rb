@@ -11,11 +11,20 @@ class OauthController < ApplicationController
   post '/register' do
     request.body.rewind
     client_metadata = JSON.parse(request.body.read) rescue {}
-    client_id = SecureRandom.uuid
+
+    client_id = SecureRandom.alphanumeric(32)
+    registration = OauthRegistration.create!(
+      client_id: client_id,
+      client_name: client_metadata['client_name'],
+      logo_uri: client_metadata['logo_uri'],
+      client_uri: client_metadata['client_uri'],
+      redirect_uris: client_metadata['redirect_uris'] || []
+    )
+
     json({
       client_id: client_id,
-      client_id_issued_at: Time.now.to_i,
-      redirect_uris: client_metadata['redirect_uris'] || [],
+      client_id_issued_at: registration.created_at.to_i,
+      redirect_uris: registration.redirect_uris,
       grant_types: ['authorization_code', 'refresh_token'],
       response_types: ['code'],
       token_endpoint_auth_method: 'none'
@@ -29,12 +38,27 @@ class OauthController < ApplicationController
     halt_json(:bad_request, "Invalid response_type") unless params[:response_type] == 'code'
     halt_json(:bad_request, "Invalid code_challenge_method") unless params[:code_challenge_method] == 'S256'
 
+    begin
+      registration = OauthRegistration.verify_authorize(params)
+    rescue ArgumentError => e
+      halt_json(:bad_request, e.message)
+    end
+
     @authorize_params = params.slice(
       :response_type, :client_id, :redirect_uri,
       :code_challenge, :code_challenge_method, :resource, :state
     )
 
-    slim :oauth_authorize
+    render_component 'OAuthConsent', {
+      client_id: params[:client_id],
+      client_name: registration.client_name,
+      client_uri: registration.client_uri,
+      logo_uri: registration.logo_uri,
+      redirect_uri: registration.verified_redirect_uri,
+      resource: params[:resource],
+      authorize_params: @authorize_params,
+      current_user: current_user&.as_json
+    }.compact, noscript_view: false
   end
 
   post '/authorize' do
@@ -44,6 +68,7 @@ class OauthController < ApplicationController
       redirect_uri = URI.parse(params[:redirect_uri])
       query_params = URI.decode_www_form(redirect_uri.query || '').to_h
       query_params['error'] = 'access_denied'
+      query_params['error_description'] = 'User denied authorization'
       query_params['state'] = params[:state] if params[:state]
       redirect_uri.query = URI.encode_www_form(query_params)
       redirect redirect_uri.to_s # halts
@@ -55,25 +80,24 @@ class OauthController < ApplicationController
     halt_json(:bad_request, "Invalid response_type") unless params[:response_type] == 'code'
     halt_json(:bad_request, "Invalid code_challenge_method") unless params[:code_challenge_method] == 'S256'
 
-    auth_code = SecureRandom.urlsafe_base64(32)
-    oauth_data = {
-      authorization_code: auth_code,
-      client_id: params[:client_id],
-      redirect_uri: params[:redirect_uri],
-      code_challenge: params[:code_challenge],
-      code_challenge_method: params[:code_challenge_method],
-      resource: params[:resource],
-      expires_at: (Time.now + 10.minutes).to_i
-    }
+    registration = begin
+      OauthRegistration.verify_authorize(params)
+    rescue ArgumentError => e
+      halt_json(:bad_request, e.message)
+    end
+    halt_json(:bad_request, "Invalid client") unless registration
+
+    oauth_data = registration.verified_oauth_data
+    halt_json(:internal_server_error, "Failed to build oauth data") unless oauth_data
 
     user_oauth = current_user.get_or_create_user_oauth
     user_oauth.data = oauth_data
     user_oauth.data_will_change!
     halt_json(:internal_server_error, "Failed to create authorization code") unless user_oauth.save
 
-    redirect_uri = URI.parse(params[:redirect_uri])
+    redirect_uri = URI.parse(oauth_data[:redirect_uri])
     query_params = URI.decode_www_form(redirect_uri.query || '').to_h
-    query_params['code'] = auth_code
+    query_params['code'] = oauth_data[:authorization_code]
     query_params['state'] = params[:state] if params[:state]
     redirect_uri.query = URI.encode_www_form(query_params)
     redirect redirect_uri.to_s
@@ -117,7 +141,7 @@ class OauthController < ApplicationController
       access_token: bearer_token,
       token_type: 'Bearer',
       expires_in: expiration.to_i,
-      scope: EnvironmentParameters[:agentcore_gateway_token_scope]
+      scope: EnvironmentParameters[:mcp_server_invoke_scope]
     })
   end
 end
