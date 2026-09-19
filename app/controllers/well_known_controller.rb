@@ -30,6 +30,16 @@ class WellKnownController < ApplicationController
     json UserOauth.jwks_as_json
   end
 
+  get '/oauth-protected-resource' do
+    base_url = Constants::BASE_URL
+    json({
+      resource: base_url,
+      authorization_servers: [base_url],
+      bearer_methods_supported: ["header"],
+      scopes_supported: [ENV.fetch('AGENTCORE_GATEWAY_TOKEN_SCOPE', 'openid')]
+    })
+  end
+
   get '/oauth-authorization-server' do
     base_url = ENV.fetch('OAUTH_AUTHORIZATION_SERVER', "#{Constants::BASE_URL}/oauth")
     json({
