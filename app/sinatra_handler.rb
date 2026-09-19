@@ -4,8 +4,14 @@ require 'json'
 require 'rack'
 require 'base64'
 
-$app ||= Rack::Builder.parse_file("#{__dir__}/config.ru")
 ENV['RACK_ENV'] ||= 'production'
+begin
+  $app ||= Rack::Builder.parse_file("#{__dir__}/config.ru")
+rescue => e
+  $stderr.puts "BOOT ERROR: #{e.class}: #{e.message}"
+  $stderr.puts e.backtrace.join("\n")
+  raise
+end
 
 class SinatraHandler
   def self.build_query_string(params)
