@@ -41,17 +41,18 @@ class WellKnownController < ApplicationController
   end
 
   get '/oauth-authorization-server' do
-    base_url = ENV.fetch('OAUTH_AUTHORIZATION_SERVER', "#{Constants::BASE_URL}/oauth")
+    base_url = Constants::BASE_URL
+    oauth_url = "#{base_url}/oauth"
     json({
       issuer: base_url,
-      authorization_endpoint: "#{base_url}/authorize",
-      token_endpoint: "#{base_url}/token",
-      registration_endpoint: "#{base_url}/register",
+      authorization_endpoint: "#{oauth_url}/authorize",
+      token_endpoint: "#{oauth_url}/token",
+      registration_endpoint: "#{oauth_url}/register",
       response_types_supported: ["code"],
       response_modes_supported: ["query"],
       grant_types_supported: ["authorization_code", "refresh_token"],
       token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post", "none"],
-      revocation_endpoint: "#{base_url}/token",
+      revocation_endpoint: "#{oauth_url}/token",
       code_challenge_methods_supported: ["plain", "S256"]
     })
   end
