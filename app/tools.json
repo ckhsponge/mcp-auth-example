@@ -1,0 +1,19 @@
+[
+  {
+    "name": "echo",
+    "description": "Echoes the input message",
+    "annotations": {
+      "title": "Echo",
+      "read_only_hint": true,
+      "destructive_hint": false,
+      "idempotent_hint": true,
+      "open_world_hint": false
+    },
+    "input_schema": {
+      "properties": {
+        "message": { "type": "string" }
+      },
+      "required": ["message"]
+    }
+  }
+]

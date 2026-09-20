@@ -40,6 +40,11 @@ class WellKnownController < ApplicationController
     })
   end
 
+  get '/tools.json' do
+    content_type :json
+    File.read(File.expand_path('../../tools.json', __dir__))
+  end
+
   get '/oauth-authorization-server' do
     base_url = Constants::BASE_URL
     oauth_url = "#{base_url}/oauth"
