@@ -18,11 +18,12 @@ class WellKnownController < ApplicationController
       jwks_uri: "#{base_url}/.well-known/jwks.json",
       response_types_supported: ["code", "token"],
       revocation_endpoint: "#{base_url}/oauth/revoke",
-      scopes_supported: ["openid", "email", "phone", "profile"],
+      scopes_supported: ["openid"],
       subject_types_supported: ["public"],
       token_endpoint: "#{base_url}/oauth/token",
       token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post"],
-      userinfo_endpoint: "#{base_url}/oauth/user_info"
+      userinfo_endpoint: "#{base_url}/oauth/user_info",
+      client_id_metadata_document_supported: true
     })
   end
 
@@ -58,7 +59,8 @@ class WellKnownController < ApplicationController
       grant_types_supported: ["authorization_code", "refresh_token"],
       token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post", "none"],
       revocation_endpoint: "#{oauth_url}/token",
-      code_challenge_methods_supported: ["plain", "S256"]
+      code_challenge_methods_supported: ["plain", "S256"],
+      client_id_metadata_document_supported: true
     })
   end
 end
