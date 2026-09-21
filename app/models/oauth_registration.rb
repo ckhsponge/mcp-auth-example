@@ -5,6 +5,7 @@ class OauthRegistration < ApplicationRecord
 
   attr_accessor :verified_redirect_uri, :authorize_params
 
+  # don't allow https to be saved here, that is CIMD only
   validates :client_id, presence: true, uniqueness: true,
             format: { with: /\A[a-zA-Z0-9]+\z/, message: "must be alphanumeric" }
 
@@ -27,6 +28,8 @@ class OauthRegistration < ApplicationRecord
     redirect_uri = params[:redirect_uri]
 
     if client_id.start_with?('https://')
+      # CIMD did not /register so no registration was persisted
+      # instead, client_id is a url
       begin
         response = Faraday.new(request: { timeout: 6 }).get(client_id)
         raise ArgumentError, "Failed to fetch client metadata" unless response.success?

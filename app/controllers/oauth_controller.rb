@@ -8,6 +8,8 @@ class OauthController < ApplicationController
     200
   end
 
+  # only used in DCR, not CIMD
+  # for CIMD, the client_id is a URL that is checked
   post '/register' do
     request.body.rewind
     client_metadata = JSON.parse(request.body.read) rescue {}
