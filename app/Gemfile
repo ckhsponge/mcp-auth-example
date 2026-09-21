@@ -29,3 +29,9 @@ gem "sinatra-activerecord", "~> 2.0"
 gem 'activerecord-dsql-adapter', git: 'https://github.com/ckhsponge/activerecord-dsql-adapter.git', branch: 'occ-retry'
 
 gem "faraday", "~> 2.14"
+gem 'ostruct', "~> 0.6"
+
+group :test do
+  gem 'rspec', '~> 3'
+  gem 'rack-test', '~> 2'
+end

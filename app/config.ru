@@ -11,6 +11,7 @@ use Rack::JSONBodyParser
 
 map("/.well-known") { run LAZY_LOAD.call('WellKnownController') }
 map("/oauth")       { run LAZY_LOAD.call('OauthController') }
+map("/api")         { run LAZY_LOAD.call('ApiController') }
 map("/")            { run LAZY_LOAD.call('RootController') }
 
 CONFIG_RU_END = Time.now
