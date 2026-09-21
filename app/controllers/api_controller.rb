@@ -1,6 +1,7 @@
 class ApiController < ApplicationController
   before do
     halt_json(:unauthorized) unless bearer_payload
+    verify_digest_signature!
   end
 
   post '/tool_call' do
@@ -9,6 +10,19 @@ class ApiController < ApplicationController
   end
 
   private
+
+  def verify_digest_signature!
+    return unless (secret = ENV['API_DIGEST_SECRET'])
+    token = (request.env['HTTP_AUTHORIZATION'] || '').delete_prefix('Bearer ')
+    timestamp = request.env['HTTP_BEARER_VERIFIED_AT'] || ''
+    expected = OpenSSL::HMAC.hexdigest('SHA256', secret, "#{token}:#{timestamp}")
+    received = request.env['HTTP_X_SIGNATURE'] || ''
+    begin
+      halt_json(:unauthorized) unless OpenSSL.fixed_length_secure_compare(expected, received)
+    rescue ArgumentError # if strings are different lengths
+      halt_json(:unauthorized)
+    end
+  end
 
   def bearer_payload
     @bearer_payload ||= begin
