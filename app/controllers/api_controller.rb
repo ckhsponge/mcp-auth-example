@@ -1,6 +1,9 @@
 class ApiController < ApplicationController
   before do
-    halt_json(:unauthorized) unless bearer_payload
+    unless bearer_payload
+      puts "[api] 401 Invalid Bearer"
+      halt_json(:unauthorized, "Invalid Bearer")
+    end
     verify_digest_signature!
   end
 
@@ -15,12 +18,17 @@ class ApiController < ApplicationController
     return unless (secret = ENV['API_DIGEST_SECRET'])
     token = (request.env['HTTP_AUTHORIZATION'] || '').delete_prefix('Bearer ')
     timestamp = request.env['HTTP_BEARER_VERIFIED_AT'] || ''
+    puts "[api] verifying signature timestamp=#{timestamp.inspect} x_sig_present=#{request.env['HTTP_X_SIGNATURE'].present?} env_keys=#{request.env.keys.join(',')}"
     expected = OpenSSL::HMAC.hexdigest('SHA256', secret, "#{token}:#{timestamp}")
     received = request.env['HTTP_X_SIGNATURE'] || ''
     begin
-      halt_json(:unauthorized) unless OpenSSL.fixed_length_secure_compare(expected, received)
-    rescue ArgumentError # if strings are different lengths
-      halt_json(:unauthorized)
+      unless OpenSSL.fixed_length_secure_compare(expected, received)
+        puts "[api] 401 Invalid Signature"
+        halt_json(:unauthorized, "Invalid Signature")
+      end
+    rescue ArgumentError
+      puts "[api] 401 Invalid Signature (bad length)"
+      halt_json(:unauthorized, "Invalid Signature")
     end
   end
 

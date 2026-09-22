@@ -7,6 +7,14 @@ require 'jwt'
 require 'rack/test'
 require_relative '../application'
 
+def with_env(vars)
+  old = vars.transform_keys(&:to_s).transform_values { |k, _| ENV[k] }
+  vars.each { |k, v| ENV[k.to_s] = v }
+  yield
+ensure
+  old.each { |k, v| v ? ENV[k] = v : ENV.delete(k) }
+end
+
 module TokenHelper
   PEM       = ENV.fetch('MCP_SERVER_PEM')
   KID       = ENV.fetch('MCP_SERVER_KID')
